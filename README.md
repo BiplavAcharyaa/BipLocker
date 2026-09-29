@@ -1,199 +1,352 @@
 # 🔐 BipLocker
 
-**BipLocker** is a lightweight, security-focused Android application that provides a simple mathematical lock mechanism combined with the device's native biometric authentication.
+**BipLocker** is a lightweight Android application-locking solution designed to protect selected applications using a user-defined **PIN and device biometrics**.
 
-The application is designed specifically for **Android devices** and uses the Android platform's built-in security and biometric capabilities rather than implementing a custom biometric authentication system.
+Users can select applications such as **YouTube, Facebook, Instagram, WhatsApp, banking applications, galleries, or any other supported installed application** and require authentication before those applications can be accessed.
+
+BipLocker itself is also protected using the same authentication mechanism, preventing unauthorised users from changing locking configuration or security settings.
 
 > **Platform:** Android
-> **Application Type:** Native Android Security Utility
-> **Authentication:** Mathematical Lock + Device Biometrics
-> **Biometric Support:** Fingerprint & Face Unlock
-> **Backend:** None
-> **Cloud Dependency:** None
+> **Application Type:** Android App Locker
+> **Authentication:** PIN + Device Biometrics
+> **Biometric Support:** Fingerprint / Face Authentication where supported by the device
+> **Backend:** None required
+> **Cloud Dependency:** None required
+> **Primary Function:** Application-level access control
 
 ---
 
-## 📌 Overview
+# 📌 Features
 
-BipLocker provides an additional application-level locking mechanism while leveraging the security infrastructure already available on the user's Android device.
+### 🔐 PIN Protection
 
-The application supports:
+Users can configure a personal PIN that is used to unlock protected applications.
 
-* 🔢 Mathematical/PIN-based authentication
-* 👆 Fingerprint authentication
-* 🙂 Face authentication / Face Unlock
-* 🔐 Android system biometric security
-* 📱 Android-native user experience
-* ⚡ Lightweight local execution
-* 🚫 No backend server required
-* 🚫 No external database required
-* 🚫 No cloud authentication required
-* 🔒 Authentication handled locally on the device
-
-The biometric functionality is intentionally designed to work with the **biometric capabilities registered on the Android device**. BipLocker does not store or process raw fingerprint or facial biometric data.
-
----
-
-# 🏗️ Architecture
-
-BipLocker follows a **local-first Android architecture**, where authentication and application logic execute directly on the user's Android device.
+The PIN can be changed from within BipLocker after successful authentication.
 
 ```text
-┌──────────────────────────────────────────────┐
-│                  BipLocker                   │
-│                Android App                  │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│              Presentation Layer              │
-│                                              │
-│  • Lock Screen                               │
-│  • Mathematical Authentication UI            │
-│  • Biometric Authentication UI               │
-│  • User Interaction                         │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│              Application Logic               │
-│                                              │
-│  • Authentication Flow                       │
-│  • Lock Validation                            │
-│  • Biometric Authentication Handling          │
-│  • Authentication State Management            │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│             Android Security Layer           │
-│                                              │
-│        Android Biometric Framework            │
-│                    │                         │
-│          ┌─────────┴─────────┐               │
-│          ▼                   ▼               │
-│     Fingerprint          Face Unlock         │
-└──────────────────────────────────────────────┘
+Current PIN
+    │
+    ▼
+Authentication
+    │
+    ▼
+Change PIN
+    │
+    ├── Enter New PIN
+    │
+    ├── Confirm New PIN
+    │
+    └── Save
 ```
-
-### Architecture Principles
-
-BipLocker is designed around the following principles:
-
-1. **Local Authentication**
-
-   * Authentication occurs directly on the Android device.
-   * No authentication request is sent to a remote server.
-
-2. **Platform Security**
-
-   * Biometric authentication relies on Android's native biometric framework.
-   * The application does not attempt to access raw biometric information.
-
-3. **Minimal Attack Surface**
-
-   * No unnecessary backend services.
-   * No external authentication provider.
-   * No remote database required.
-
-4. **Separation of Authentication Methods**
-
-   * Mathematical authentication remains available as an application-level authentication mechanism.
-   * Biometric authentication acts as an additional device-supported authentication method.
 
 ---
 
-# 🔐 Biometric Authentication
+### 👆 Fingerprint Authentication
 
-BipLocker supports biometric authentication provided by the Android device.
+BipLocker can use the fingerprint authentication capabilities available on the Android device.
 
-Depending on the hardware and Android configuration of the device, the available authentication methods may include:
+The application delegates biometric verification to the Android operating system rather than processing fingerprint data itself.
 
-### 👆 Fingerprint
+---
 
-If the device has a registered fingerprint sensor and fingerprints configured, BipLocker can invoke the Android biometric authentication flow.
+### 🙂 Face Authentication
 
-The application does **not** receive the fingerprint itself.
-
-The Android operating system performs the biometric verification and returns only the authentication result to the application.
-
-### 🙂 Face Unlock
-
-On compatible Android devices, BipLocker can also use the device's supported face authentication mechanism.
+On compatible Android devices, BipLocker can use the device's supported biometric authentication mechanism, including face authentication where the Android device exposes it through the supported biometric framework.
 
 Availability depends on:
 
 * Device hardware
 * Android version
 * Manufacturer implementation
-* Whether face authentication is configured
-* Whether the device exposes the authentication method through the supported Android biometric APIs
+* Configured biometric credentials
+* APIs exposed by the device
 
-### 🔒 Privacy Model
+---
 
-BipLocker does not store:
+# 📱 Application Locking
 
-* Fingerprint images
-* Face images
-* Biometric templates
-* Raw biometric sensor data
+The primary purpose of BipLocker is to allow users to select applications that should require authentication before access.
 
-The Android operating system remains responsible for biometric processing.
+For example:
+
+```text
+Installed Applications
+
+☑ YouTube
+☑ Instagram
+☐ Chrome
+☑ Facebook
+☐ Calculator
+☑ WhatsApp
+☐ Gmail
+```
+
+When a protected application is opened, BipLocker initiates the configured authentication mechanism.
+
+```text
+User
+ │
+ ▼
+Opens Protected App
+ │
+ ▼
+BipLocker Lock Enforcement
+ │
+ ▼
+Authentication Screen
+ │
+ ├── PIN
+ │
+ └── Device Biometrics
+ │
+ ▼
+Authentication Successful
+ │
+ ▼
+Application Access Granted
+```
+
+If authentication fails or is cancelled, access to the protected application remains blocked.
+
+---
+
+# 🛡️ BipLocker Self-Protection
+
+BipLocker does not only protect other applications.
+
+**BipLocker itself is protected.**
+
+This is an important part of the security model because an app locker would be ineffective if anyone could simply open BipLocker and disable the configured application locks.
+
+The BipLocker application therefore requires authentication when accessing protected security/configuration functionality.
 
 Conceptually:
 
 ```text
-User
-  │
-  ▼
-BipLocker
-  │
-  │ Biometric Authentication Request
-  ▼
-Android Biometric Framework
-  │
-  ├── Fingerprint Sensor
-  │
-  └── Face Authentication
-  │
-  ▼
-Android Security Subsystem
-  │
-  ▼
-Authentication Result
-  │
-  ├── SUCCESS
-  └── FAILURE
-  │
-  ▼
-BipLocker
+                 ┌──────────────────┐
+                 │     BipLocker    │
+                 └────────┬─────────┘
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+              ▼                       ▼
+       Security Settings        Protected Apps
+              │                       │
+              ▼                       ▼
+       PIN / Biometrics        PIN / Biometrics
+              │                       │
+              └───────────┬───────────┘
+                          │
+                          ▼
+                   Access Granted
+```
+
+This prevents an unauthorised user from simply entering BipLocker and removing applications from the protected list.
+
+---
+
+# 🏗️ Architecture
+
+BipLocker follows a **local-first Android architecture**.
+
+No backend server is required for the core locking and authentication workflow.
+
+```text
+┌──────────────────────────────────────────────┐
+│                  BipLocker                   │
+│              Android Application             │
+└───────────────────────┬──────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────┐
+│               Presentation Layer             │
+│                                              │
+│  • Home / Dashboard                          │
+│  • App Selection                             │
+│  • PIN Authentication                        │
+│  • Biometric Authentication                  │
+│  • Security Settings                         │
+│  • Change PIN                                │
+└───────────────────────┬──────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────┐
+│              Application Layer               │
+│                                              │
+│  • Authentication Management                 │
+│  • App Lock Management                       │
+│  • Protected App Configuration               │
+│  • PIN Management                             │
+│  • Lock State Management                     │
+│  • Authentication Flow                       │
+└───────────────────────┬──────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────┐
+│                Android Layer                 │
+│                                              │
+│  • Android Biometric APIs                    │
+│  • Application / Package Management          │
+│  • Android Services                          │
+│  • Local Storage                              │
+│  • Application Lifecycle                     │
+└───────────────────────┬──────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────┐
+│             Android Device Security          │
+│                                              │
+│       Fingerprint / Face / Device PIN        │
+└──────────────────────────────────────────────┘
 ```
 
 ---
 
-# 📱 Android-Only Design
+# 🔐 Authentication Architecture
 
-BipLocker is specifically designed for **Android**.
+BipLocker supports two authentication mechanisms:
 
-The application relies on Android platform capabilities for:
+```text
+                 BipLocker Authentication
+                           │
+                 ┌─────────┴─────────┐
+                 │                   │
+                 ▼                   ▼
+              PIN Auth          Biometrics
+                                     │
+                             ┌───────┴───────┐
+                             │               │
+                             ▼               ▼
+                        Fingerprint       Face
+```
 
-* Application lifecycle
-* Authentication
-* Biometric authentication
-* Device security
-* Local application storage
-* Android UI
-* Permission management
+The user can use the available authentication method supported by the application and device.
 
-It is not intended to be a cross-platform application.
+Biometric authentication is handled through Android's security framework.
 
-The architecture therefore prioritises native Android security and platform integration over cross-platform abstraction.
+BipLocker does **not** need access to raw fingerprint or facial biometric data.
 
 ---
 
-# 🧩 Project Structure
+# 🔒 Biometric Security Model
 
-The repository is organised around the main Android project directory:
+BipLocker does not implement its own fingerprint or facial recognition algorithms.
+
+Instead, it requests authentication through the Android biometric framework.
+
+```text
+User
+ │
+ ▼
+BipLocker
+ │
+ │ Biometric Authentication Request
+ ▼
+Android Biometric Framework
+ │
+ ├── Fingerprint
+ │
+ └── Face Authentication
+ │
+ ▼
+Android Security Subsystem
+ │
+ ▼
+Authentication Result
+ │
+ ├── SUCCESS
+ │
+ └── FAILURE
+ │
+ ▼
+BipLocker
+```
+
+The application receives the authentication result rather than the underlying biometric information.
+
+BipLocker does not need to store:
+
+* Fingerprint images
+* Face images
+* Raw biometric sensor data
+* Biometric templates
+
+The Android device remains responsible for biometric processing.
+
+---
+
+# 📲 Protected Application Workflow
+
+When a user selects an application for protection, BipLocker maintains the protected application configuration locally.
+
+Example:
+
+```text
+BipLocker
+│
+├── Protected Applications
+│   ├── YouTube
+│   ├── Instagram
+│   ├── Facebook
+│   └── WhatsApp
+│
+├── Authentication
+│   ├── PIN
+│   └── Biometrics
+│
+└── Security Settings
+    └── Change PIN
+```
+
+When the user launches a protected application:
+
+```text
+Launch Application
+        │
+        ▼
+Is Application Protected?
+        │
+    ┌───┴───┐
+    │       │
+   YES      NO
+    │       │
+    ▼       ▼
+Lock Screen  Open Normally
+    │
+    ▼
+Authenticate
+    │
+ ┌──┴───────────────┐
+ │                  │
+ ▼                  ▼
+PIN             Biometrics
+ │                  │
+ └────────┬─────────┘
+          ▼
+   Authentication
+       Result
+          │
+     ┌────┴────┐
+     │         │
+  SUCCESS    FAILURE
+     │         │
+     ▼         ▼
+  Allow      Remain
+  Access     Locked
+```
+
+---
+
+# 📁 Project Structure
+
+The main project directory is:
+
+```text
+BipLocker/
+```
+
+A typical project structure is:
 
 ```text
 BipLocker/
@@ -216,53 +369,53 @@ BipLocker/
 ├── build.gradle
 ├── settings.gradle
 │
+├── APK/
+│   └── BipLocker.apk
+│
 └── README.md
 ```
 
-> The exact package structure may vary depending on the current Android Studio/Gradle configuration.
+The exact source structure can vary depending on the current Android Studio and Gradle configuration.
 
 ---
 
 # 📦 APK
 
-A pre-built APK is included in the project directory for direct installation on an Android device.
+A pre-built APK is included with the project.
 
-The expected project layout is:
+The main project folder is:
 
 ```text
 BipLocker/
-│
-├── app/
-│
-├── gradle/
-│
-├── ...
-│
-└── APK/
-    └── BipLocker.apk
 ```
 
-Therefore, the APK can be located using the following path from the main project directory:
+The expected APK location is:
 
 ```text
 BipLocker/APK/BipLocker.apk
 ```
 
-If the APK is stored directly under another build/output directory in the repository, use the corresponding generated APK path from the project.
+Therefore, from the repository root:
 
-For a standard Android Gradle build, the generated APK is typically located under:
+```text
+BipLocker/
+└── APK/
+    └── BipLocker.apk
+```
+
+If the APK is generated through the Android Gradle build system, the standard output location is:
 
 ```text
 BipLocker/app/build/outputs/apk/
 ```
 
-For example:
+For a debug build:
 
 ```text
 BipLocker/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-or:
+For a release build:
 
 ```text
 BipLocker/app/build/outputs/apk/release/app-release.apk
@@ -272,42 +425,39 @@ BipLocker/app/build/outputs/apk/release/app-release.apk
 
 # 🚀 Installation
 
-## Method 1 — Install the Included APK
+## Option 1 — Install the Included APK
 
-1. Download or clone the repository.
-2. Open the `BipLocker` directory.
-3. Navigate to the APK location.
-4. Transfer the APK to your Android device.
-5. Open the APK.
-6. Allow installation from the relevant source if Android requests permission.
-7. Install BipLocker.
-8. Launch the application.
-9. Configure the required authentication method.
-
-Example:
+1. Clone or download the repository.
+2. Open the `BipLocker` folder.
+3. Navigate to:
 
 ```text
-BipLocker/
-└── APK/
-    └── BipLocker.apk
+BipLocker/APK/
 ```
+
+4. Transfer `BipLocker.apk` to an Android device.
+5. Open the APK.
+6. Allow APK installation if Android requests permission.
+7. Install the application.
+8. Launch BipLocker.
+9. Configure the PIN.
+10. Enable/configure biometric authentication if supported.
+11. Select the applications that should be protected.
 
 ---
 
-# 🛠️ Building From Source
+# 🛠️ Build From Source
 
 ## Requirements
-
-Before building BipLocker from source, ensure the development environment contains:
 
 * Android Studio
 * Android SDK
 * Android SDK Platform Tools
-* Java Development Kit compatible with the project's Gradle configuration
-* Gradle Wrapper included with the project
+* Java Development Kit compatible with the project
+* Gradle Wrapper included with the repository
 * Android device or Android Emulator
 
-### Clone Repository
+### Clone the Repository
 
 ```bash
 git clone <repository-url>
@@ -316,25 +466,19 @@ cd BipLocker
 
 ### Build Debug APK
 
-On Windows:
+#### Windows
 
 ```powershell
 .\gradlew.bat assembleDebug
 ```
 
-On Linux/macOS:
+#### Linux / macOS
 
 ```bash
 ./gradlew assembleDebug
 ```
 
-The generated APK will normally be available under:
-
-```text
-app/build/outputs/apk/debug/
-```
-
-For example:
+The generated APK will normally be available at:
 
 ```text
 app/build/outputs/apk/debug/app-debug.apk
@@ -342,216 +486,255 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-# 🔏 Security Model
+# 🔄 Change PIN
 
-BipLocker follows a **device-trusted authentication model**.
+BipLocker allows the user to change the configured PIN.
 
-For biometric authentication, the application delegates biometric verification to the Android operating system rather than implementing biometric recognition itself.
+The expected flow is:
 
-This provides several advantages:
+```text
+BipLocker
+   │
+   ▼
+Authenticate
+   │
+   ▼
+Security Settings
+   │
+   ▼
+Change PIN
+   │
+   ├── Current Authentication
+   │
+   ├── New PIN
+   │
+   ├── Confirm PIN
+   │
+   └── Save
+```
 
-* No biometric database
-* No biometric image storage
-* No biometric data transmission
-* No custom biometric recognition algorithm
-* Reduced application-level handling of sensitive biometric information
-* Native Android security integration
-
-The application receives an authentication result rather than the user's underlying biometric information.
+The PIN change operation should only be accessible after successful authentication.
 
 ---
 
-# 🧠 Authentication Flow
+# 📱 Android Compatibility
 
-The general authentication flow is:
+BipLocker is specifically designed for Android.
 
-```text
-                    ┌───────────────┐
-                    │ Launch App    │
-                    └───────┬───────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │ Authentication      │
-                 │ Required            │
-                 └──────────┬──────────┘
-                            │
-              ┌─────────────┴─────────────┐
-              │                           │
-              ▼                           ▼
-      ┌───────────────┐          ┌────────────────┐
-      │ Mathematical  │          │ Biometric      │
-      │ Authentication│          │ Authentication │
-      └───────┬───────┘          └───────┬────────┘
-              │                           │
-              ▼                           ▼
-       Validate Input            Android Biometric
-                                      Framework
-              │                           │
-              └─────────────┬─────────────┘
-                            │
-                            ▼
-                    ┌───────────────┐
-                    │ Authentication│
-                    │ Result        │
-                    └───────┬───────┘
-                            │
-                    ┌───────┴───────┐
-                    │               │
-                  SUCCESS         FAILURE
-                    │               │
-                    ▼               ▼
-             Unlock / Access      Remain Locked
-```
+Biometric functionality depends on the capabilities exposed by the Android device.
+
+Supported authentication capabilities may vary depending on:
+
+* Android version
+* Device manufacturer
+* Device hardware
+* Configured device security
+* Available biometric sensors
+* Android biometric API support
+
+Fingerprint authentication requires a compatible fingerprint sensor and configured fingerprint credentials.
+
+Face authentication requires compatible device hardware/software and appropriate Android biometric support.
+
+---
+
+# 🔒 Security Considerations
+
+BipLocker uses a **local authentication model** for its core functionality.
+
+There is no requirement for:
+
+* Remote authentication servers
+* Cloud biometric databases
+* External authentication providers
+* Internet connectivity for biometric verification
+
+The application relies on Android's native security mechanisms wherever applicable.
+
+### Important
+
+BipLocker cannot override Android's own security model.
+
+The effectiveness of biometric authentication depends on the security capabilities and configuration of the underlying Android device.
 
 ---
 
 # 🧪 Testing
 
-BipLocker should be tested on physical Android devices where possible, particularly for biometric functionality.
+Recommended testing should include:
 
-Recommended test cases include:
+### PIN
 
-### Authentication
+* Create PIN
+* Correct PIN
+* Incorrect PIN
+* PIN change
+* Incorrect PIN during protected-app access
+* Cancelled authentication
 
-* Correct mathematical authentication
-* Incorrect mathematical authentication
-* Empty/invalid input
-* Authentication cancellation
-* Multiple authentication attempts
+### Biometrics
 
-### Fingerprint
+* Fingerprint authentication
+* Face authentication on compatible devices
+* Failed biometric authentication
+* Cancelled biometric authentication
+* Device without biometric hardware
+* Device with biometric hardware but no enrolled credentials
 
-* Registered fingerprint
-* Unregistered fingerprint
-* Incorrect fingerprint
-* Fingerprint authentication cancellation
-* Device without fingerprint hardware
+### Application Locking
 
-### Face Authentication
+* Add an application to protected apps
+* Remove an application from protected apps
+* Launch protected application
+* Authenticate successfully
+* Fail authentication
+* Lock multiple applications
+* Verify BipLocker itself remains protected
 
-* Registered face
-* Failed face authentication
-* Authentication cancellation
-* Device without supported face authentication
+### Security Configuration
 
-### Device Compatibility
-
-* Different Android versions
-* Different manufacturers
-* Devices with fingerprint only
-* Devices with face authentication
-* Devices with multiple biometric methods
-* Devices without biometric hardware
-
----
-
-# 🔒 Privacy
-
-BipLocker is designed to keep authentication local to the Android device.
-
-The biometric authentication process is delegated to Android's native security framework.
-
-The application does not require a remote authentication server to perform biometric verification.
-
-No cloud-based biometric database is required.
+* Attempt to access settings without authentication
+* Attempt to change PIN without authentication
+* Attempt to modify protected applications without authentication
+* Restart device
+* Verify protected application behaviour after reboot
 
 ---
 
 # ⚙️ Technical Characteristics
 
-| Component              | Implementation                             |
-| ---------------------- | ------------------------------------------ |
-| Platform               | Android                                    |
-| Application Type       | Native Android Application                 |
-| Authentication         | Mathematical + Biometric                   |
-| Fingerprint            | Android device biometric authentication    |
-| Face Unlock            | Android-supported biometric authentication |
-| Backend                | None required                              |
-| Database               | None required for biometric authentication |
-| Cloud                  | Not required                               |
-| Biometric Storage      | None                                       |
-| Network Authentication | Not required                               |
-| Deployment             | APK                                        |
-| Build System           | Gradle                                     |
-| IDE                    | Android Studio                             |
+| Component              | Implementation                                    |
+| ---------------------- | ------------------------------------------------- |
+| Platform               | Android                                           |
+| Application Type       | Application Locker                                |
+| Authentication         | PIN + Device Biometrics                           |
+| Fingerprint            | Android Biometric Framework                       |
+| Face Authentication    | Device/Android-supported biometric authentication |
+| App Selection          | Installed application selection                   |
+| PIN Management         | User-configurable                                 |
+| BipLocker Protection   | Yes                                               |
+| Protected Applications | User-selected                                     |
+| Backend                | Not required                                      |
+| Cloud Dependency       | Not required                                      |
+| Biometric Data Storage | Not handled by BipLocker                          |
+| Deployment             | APK                                               |
+| Build System           | Gradle                                            |
+| IDE                    | Android Studio                                    |
 
 ---
 
-# 📋 Project Goals
+# 🧠 Design Philosophy
 
-BipLocker was designed with a simple technical objective:
+BipLocker is intentionally designed around three principles:
 
-> **Provide a lightweight Android locking mechanism while taking advantage of the security infrastructure already provided by the Android operating system.**
+### 1. Local
 
-The project intentionally avoids unnecessary backend infrastructure and keeps the authentication workflow local to the device.
+The core application-locking workflow runs locally on the Android device.
 
----
+### 2. Secure
 
-# ⚠️ Compatibility Notes
+Authentication is based on a user-defined PIN and Android's native biometric security mechanisms.
 
-Biometric capabilities are ultimately determined by the Android device and operating system.
+### 3. Simple
 
-Therefore:
-
-* Not every Android device supports fingerprint authentication.
-* Not every Android device supports face authentication through the same biometric APIs.
-* The available biometric methods depend on the device manufacturer and Android version.
-* The user must have biometric authentication configured on the device.
-* Android may require a secure device credential such as a PIN, pattern, or password before biometric authentication can be used.
-
-BipLocker cannot enable biometric hardware that the device itself does not provide.
-
----
-
-# 👨‍💻 Development
-
-BipLocker is intended to remain lightweight and maintainable.
-
-The project architecture avoids unnecessary external infrastructure and focuses on:
+The user should be able to:
 
 ```text
-Android Application
-        │
-        ├── Authentication
-        │
-        ├── Local Application Logic
-        │
-        ├── Android Security APIs
-        │
-        └── Device Biometric Framework
+Install BipLocker
+      ↓
+Set PIN
+      ↓
+Enable Biometrics
+      ↓
+Select Apps
+      ↓
+Protect Apps
 ```
 
-This keeps the application architecture simple while allowing it to take advantage of native Android security capabilities.
+No unnecessary backend infrastructure is required.
+
+---
+
+# 🗂️ Example Use Case
+
+A user wants to protect personal applications on their Android device.
+
+They install BipLocker and configure:
+
+```text
+PIN
+└── 4829
+
+Biometric
+└── Enabled
+
+Protected Applications
+├── Instagram
+├── Facebook
+├── YouTube
+├── WhatsApp
+└── Gallery
+```
+
+When the user opens Instagram:
+
+```text
+Instagram
+    │
+    ▼
+BipLocker Authentication
+    │
+    ├── Fingerprint
+    │
+    ├── Face
+    │
+    └── PIN
+    │
+    ▼
+Authentication Successful
+    │
+    ▼
+Instagram Access Granted
+```
+
+The same authentication mechanism is used to protect BipLocker's security/configuration functionality.
 
 ---
 
 # 📄 License
 
-Add the appropriate license for the project here.
+Add the project's actual license here.
 
-For example:
+Example:
 
 ```text
 MIT License
 ```
 
-or replace this section with the project's actual proprietary/open-source licensing terms.
+If BipLocker is proprietary software, replace this section with the applicable proprietary license or usage terms.
 
 ---
 
-# 👤 Author
+# 👨‍💻 Author
 
 **Biplav Acharya**
 
-BipLocker — Android Security Utility
+**Project:** BipLocker
+**Platform:** Android
+**Category:** Application Security / App Locking
 
 ---
 
-## ⭐ Project Status
+# 🚧 Project Status
 
 **Status:** Active Development
 
-BipLocker is an Android-focused project with biometric authentication support and a local authentication architecture.
+BipLocker is an Android-focused application locker providing:
 
----
+* PIN-based protection
+* Device biometric authentication
+* User-selectable protected applications
+* PIN management
+* BipLocker self-protection
+* Local-first architecture
+* Android-native security integration
